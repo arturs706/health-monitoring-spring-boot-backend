@@ -1,6 +1,7 @@
 package uk.co.aipainappserver.users.presentation_layer;
 
 import uk.co.aipainappserver.users.application_layer.UserService;
+import uk.co.aipainappserver.users.domain_layer.entities.UserDto;
 import uk.co.aipainappserver.users.domain_layer.entities.Users;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/register")
+    @PostMapping()
     public ResponseEntity<Users> registerUser(@RequestBody Users user) {
         try {
             Users registeredUser = userService.registerUser(user);

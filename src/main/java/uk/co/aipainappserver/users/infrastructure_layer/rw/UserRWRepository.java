@@ -6,6 +6,7 @@ import java.util.UUID;
 
 public interface UserRWRepository extends JpaRepository<Users, UUID> {
 
+
     Users save(Users user);
     Users findByEmail(String email);
 

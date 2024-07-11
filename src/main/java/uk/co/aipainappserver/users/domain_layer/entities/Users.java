@@ -2,16 +2,29 @@ package uk.co.aipainappserver.users.domain_layer.entities;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.type.SqlTypes;
+import org.springframework.security.core.CredentialsContainer;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
 
+
+@Setter
+@Getter
 @Entity
-public class Users {
+@NoArgsConstructor
+
+public class Users implements UserDetails, CredentialsContainer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -42,105 +55,39 @@ public class Users {
     @Column(name = "passwd")
     private String passwd;
 
-    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "authmethod", nullable = false)
     private AuthMethodEnum authmethod = AuthMethodEnum.LOCAL;
+
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "userrole", nullable = false)
+    private UserRoleEnum userrole = UserRoleEnum.USER;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime created_at;
 
-    public Users() {
-        // Default constructor
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(() -> userrole.name());
     }
 
-    // Getters and Setters
-    public UUID getUsid() {
-        return usid;
-    }
-
-    public void setUsid(UUID usid) {
-        this.usid = usid;
-    }
-
-    public String getFullname() {
-        return fullname;
-    }
-
-    public void setFullname(String fullname) {
-        this.fullname = fullname;
-    }
-
-    public String getDob() {
-        return dob;
-    }
-
-    public void setDob(String dob) {
-        this.dob = dob;
-    }
-
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    public String getMob_phone() {
-        return mob_phone;
-    }
-
-    public void setMob_phone(String mob_phone) {
-        this.mob_phone = mob_phone;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public boolean isEmail_ver() {
-        return email_ver;
-    }
-
-    public void setEmail_ver(boolean email_ver) {
-        this.email_ver = email_ver;
-    }
-
-    public String getEmail_ver_token() {
-        return email_ver_token;
-    }
-
-    public void setEmail_ver_token(String email_ver_token) {
-        this.email_ver_token = email_ver_token;
-    }
-
-    public String getPasswd() {
+    @Override
+    public String getPassword() {
         return passwd;
     }
 
-    public void setPasswd(String passwd) {
-        this.passwd = passwd;
+    @Override
+    public String getUsername() {
+        return email;
     }
 
-    public AuthMethodEnum getAuthmethod() {
-        return authmethod;
+    @Override
+    public boolean isEnabled() {
+        return email_ver;
     }
 
-    public void setAuthmethod(AuthMethodEnum authmethod) {
-        this.authmethod = authmethod;
+    @Override
+    public void eraseCredentials() {
+        passwd = null;
     }
-
-    public LocalDateTime getCreated_at() {
-        return created_at;
-    }
-
-    public void setCreated_at(LocalDateTime created_at) {
-        this.created_at = created_at;
-    }
-
-
 }
