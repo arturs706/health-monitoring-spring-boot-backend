@@ -13,8 +13,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 public class AuthInterceptor implements HandlerInterceptor {
-    public final Logger logger = LogManager.getLogger();
-    
+
     @Value("${token.signing.key}")
     private String secret_key;
     
@@ -34,7 +33,6 @@ public class AuthInterceptor implements HandlerInterceptor {
                 sha256Hmac.init(secretKeyTwo);
                 byte[] signedBytes = sha256Hmac.doFinal(unsignedToken.getBytes(StandardCharsets.UTF_8));
                 if (!java.util.Arrays.equals(signedBytes, signatureBytes)) {
-                    logger.error("Error: " + "Invalid JWT Token");
                     res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT Token");
                     return false; 
                 } else {
@@ -42,12 +40,10 @@ public class AuthInterceptor implements HandlerInterceptor {
                 }
             
     } catch (Exception e) {
-            logger.error("Error: " + e.getMessage());
                 res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT Token");
                 return false; 
             } 
         } else {
-            logger.error("Error: " + "Missing or invalid Authorization header");
             res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing or invalid Authorization header");
             return false;
         }
