@@ -6,41 +6,56 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import uk.co.aipainappserver.users.domain_layer.entities.Users;
+
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 @Service
 public class JWTService {
+    private static final Logger logger = LoggerFactory.getLogger(JWTService.class);
     private static final String SECRET_KEY = "29B42BCF54C48DA866BFE1B6C589522F83242996E3E533E63C675E3B2CoNXk8SYA3KdSAISE7uc4B3IOVe9TRtoK";
-
+    private static final Date JWT_TOKEN_VALIDITY = new Date(System.currentTimeMillis() + 1000 * 60 * 24);
+    private static final Date JWT_REFRESH_TOKEN_VALIDITY = new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7);
     // This method is used to extract the email from the token
     public String extractEmailFromToken(String token) {
         return extractClaimFromToken(token, Claims::getSubject);
     }
 
 
-    // This method is used to extract a claim from the token
     public <T> T extractClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = getAllClaimsFromToken(token);
+        // Log the claims
+        logger.info("Claims: " + claims);
         return claimsResolver.apply(claims);
     }
 
-
-    // This method is used to generate a token for the user without any extra claims
     public String generateToken(UserDetails userDetails){
-        return generateToken(new HashMap<>(), userDetails);
+
+        return generateToken(new HashMap<>(), userDetails, JWT_TOKEN_VALIDITY);
     }
 
-    // This method is used to generate a token for the user with extra claims
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    public String generateRefreshToken(UserDetails userDetails){
+        Map<String, Object> claims = new HashMap<>();
+        if (userDetails instanceof Users) {
+            claims.put("role", ((Users) userDetails).getUserrole().name());
+        }
+        return generateToken(new HashMap<>(), userDetails, JWT_REFRESH_TOKEN_VALIDITY);
+    }
+
+
+    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails, Date JWT_TOKEN_VALIDITY) {
         return Jwts.builder()
                 .claims(extraClaims)
-                .subject(userDetails.getPassword())
+                .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                .expiration(JWT_TOKEN_VALIDITY)
                 .signWith(getSigningKey())
                 .compact();
     }
@@ -71,6 +86,5 @@ public class JWTService {
     private Date extractExpiration(String token) {
         return extractClaimFromToken(token, Claims::getExpiration);
     }
-
 
 }

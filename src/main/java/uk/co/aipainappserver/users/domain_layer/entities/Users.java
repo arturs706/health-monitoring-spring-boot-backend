@@ -5,9 +5,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.type.SqlTypes;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,7 +21,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 @Getter
 @Entity
 @NoArgsConstructor
-
+@AllArgsConstructor
+@Builder
 public class Users implements UserDetails, CredentialsContainer {
 
     @Id
@@ -40,11 +39,14 @@ public class Users implements UserDetails, CredentialsContainer {
     @Column(name = "gender")
     private String gender;
 
-    @Column(name = "mob_phone", unique = true)
-    private String mob_phone;
+    @Column(name = "mobPhone", unique = true)
+    private String mobPhone;
 
     @Column(name = "email", unique = true, nullable = false)
     private String email;
+
+    @Column(name = "social_id")
+    private String social_id;
 
     @Column(name = "email_ver", nullable = false)
     private boolean email_ver = false;
@@ -83,7 +85,7 @@ public class Users implements UserDetails, CredentialsContainer {
 
     @Override
     public boolean isEnabled() {
-        return email_ver;
+        return true;
     }
 
     @Override
